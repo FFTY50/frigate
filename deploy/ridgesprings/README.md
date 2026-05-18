@@ -54,6 +54,27 @@ Frigate will be available at:
 - Local UI: `http://<box-ip>:8971`
 - Local internal API/UI binding: `http://127.0.0.1:5000`
 
+## Camera Network Alias
+
+The Ridge Springs cameras live on `10.7.7.0/24`. The Dell keeps its normal LAN address via DHCP and adds a secondary camera-LAN address:
+
+```bash
+cd /opt/retailrewind-app
+sudo ./deploy/ridgesprings/configure-camera-alias.sh
+```
+
+Defaults:
+
+- Interface: `enp1s0`
+- Alias: `10.7.7.100/24`
+- Persistent config: `/etc/network/interfaces.d/enp1s0-camera-alias`
+
+Override only if the hardware/interface changes:
+
+```bash
+sudo CAMERA_IFACE=enp2s0 CAMERA_ALIAS_IP=10.7.7.100 ./deploy/ridgesprings/configure-camera-alias.sh
+```
+
 ## Cloudflare Tunnel
 
 The old tunnel token should not be committed to git. Add it on the box:
