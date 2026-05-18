@@ -1,0 +1,48 @@
+name: retailrewind-ridgesprings
+
+networks:
+  nvrnet:
+    name: nvrnet
+
+services:
+  frigate:
+    image: ${RETAIL_REWIND_IMAGE:-retailrewind/frigate:current}
+    container_name: frigate
+    privileged: true
+    restart: unless-stopped
+    shm_size: ${FRIGATE_SHM_SIZE:-4g}
+    networks:
+      - nvrnet
+    ports:
+      - "${FRIGATE_UI_PORT:-8971}:8971"
+      - "127.0.0.1:${FRIGATE_INTERNAL_PORT:-5000}:5000"
+    volumes:
+      - ${RR_CONFIG_DIR:-/opt/retailrewind/config}:/config
+      - ${RR_MEDIA_DIR:-/opt/retailrewind/media}:/media/frigate
+      - ${RR_DB_DIR:-/opt/retailrewind/db}:/db
+      - /etc/localtime:/etc/localtime:ro
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 2000000000
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      TZ: ${TZ:-America/New_York}
+      LIBVA_DRIVER_NAME: ${LIBVA_DRIVER_NAME:-iHD}
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    profiles:
+      - tunnel
+    networks:
+      - nvrnet
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARED_TOKEN}
+    depends_on:
+      - frigate
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

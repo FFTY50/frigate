@@ -1,0 +1,377 @@
+# Retail Rewind first live test config for Ridge Springs.
+# Migrated from the Pi 5 Frigate config to the Dell OptiPlex 3070 Intel iGPU.
+
+mqtt:
+  enabled: false
+
+database:
+  path: /db/frigate.db
+
+tls:
+  enabled: false
+
+go2rtc:
+  streams:
+    CAM1:
+      - rtsp://10.7.7.101:554/media/live/1/1
+    CAM1_sub:
+      - rtsp://10.7.7.101:554/media/live/1/2
+    CAM2:
+      - rtsp://10.7.7.102:554/media/live/1/1
+    CAM2_sub:
+      - rtsp://10.7.7.102:554/media/live/1/2
+    CAM3:
+      - rtsp://10.7.7.103:554/media/live/1/1
+    CAM3_sub:
+      - rtsp://10.7.7.103:554/media/live/1/2
+    CAM4:
+      - rtsp://10.7.7.104:554/media/live/1/1
+    CAM4_sub:
+      - rtsp://10.7.7.104:554/media/live/1/2
+    CAM5:
+      - rtsp://10.7.7.105:554/media/live/1/1
+    CAM5_sub:
+      - rtsp://10.7.7.105:554/media/live/1/2
+    CAM6:
+      - rtsp://10.7.7.106:554/media/live/1/1
+    CAM6_sub:
+      - rtsp://10.7.7.106:554/media/live/1/2
+    CAM7:
+      - rtsp://10.7.7.107:554/media/live/1/1
+    CAM7_sub:
+      - rtsp://10.7.7.107:554/media/live/1/2
+    CAM8:
+      - rtsp://10.7.7.108:554/media/live/1/1
+    CAM8_sub:
+      - rtsp://10.7.7.108:554/media/live/1/2
+    CAM9:
+      - rtsp://10.7.7.109:554/media/live/1/1
+    CAM9_sub:
+      - rtsp://10.7.7.109:554/media/live/1/2
+    CAM10:
+      - rtsp://10.7.7.110:554/media/live/1/1
+    CAM10_sub:
+      - rtsp://10.7.7.110:554/media/live/1/2
+    CAM11:
+      - rtsp://10.7.7.111:554/media/live/1/1
+    CAM11_sub:
+      - rtsp://10.7.7.111:554/media/live/1/2
+    CAM12:
+      - rtsp://10.7.7.112:554/media/live/1/1
+    CAM12_sub:
+      - rtsp://10.7.7.112:554/media/live/1/2
+    CAM13:
+      - rtsp://10.7.7.113:554/media/live/1/1
+    CAM13_sub:
+      - rtsp://10.7.7.113:554/media/live/1/2
+    CAM14:
+      - rtsp://10.7.7.114:554/media/live/1/1
+    CAM14_sub:
+      - rtsp://10.7.7.114:554/media/live/1/2
+    CAM15:
+      - rtsp://10.7.7.115:554/media/live/1/1
+    CAM15_sub:
+      - rtsp://10.7.7.115:554/media/live/1/2
+    CAM16:
+      - rtsp://10.7.7.116:554/media/live/1/1
+    CAM16_sub:
+      - rtsp://10.7.7.116:554/media/live/1/2
+
+ffmpeg:
+  hwaccel_args: preset-vaapi
+  output_args:
+    record: preset-record-generic
+
+detectors:
+  ov:
+    type: openvino
+    device: GPU
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+
+detect:
+  width: 704
+  height: 480
+  fps: 5
+
+record:
+  enabled: true
+  retain:
+    days: 60
+    mode: motion
+  alerts:
+    pre_capture: 10
+    post_capture: 15
+    retain:
+      days: 60
+      mode: motion
+
+snapshots:
+  enabled: true
+  retain:
+    default: 60
+
+birdseye:
+  enabled: true
+  mode: continuous
+  layout:
+    max_cameras: 9
+    scaling_factor: 4.0
+
+cameras:
+  CAM1:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM1_sub
+        High Stream: CAM1
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.101:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.101:554/media/live/1/2
+          roles: [detect]
+
+  CAM2:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM2_sub
+        High Stream: CAM2
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.102:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.102:554/media/live/1/2
+          roles: [detect]
+
+  CAM3:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM3_sub
+        High Stream: CAM3
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-aac
+      inputs:
+        - path: rtsp://10.7.7.103:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.103:554/media/live/1/2
+          roles: [detect]
+
+  CAM4:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM4_sub
+        High Stream: CAM4
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.104:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.104:554/media/live/1/2
+          roles: [detect]
+
+  CAM5:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM5_sub
+        High Stream: CAM5
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-aac
+      inputs:
+        - path: rtsp://10.7.7.105:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.105:554/media/live/1/2
+          roles: [detect]
+
+  CAM6:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM6_sub
+        High Stream: CAM6
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.106:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.106:554/media/live/1/2
+          roles: [detect]
+    detect:
+      fps: 1
+
+  CAM7:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM7_sub
+        High Stream: CAM7
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.107:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.107:554/media/live/1/2
+          roles: [detect]
+
+  CAM8:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM8_sub
+        High Stream: CAM8
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.108:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.108:554/media/live/1/2
+          roles: [detect]
+
+  CAM9:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM9_sub
+        High Stream: CAM9
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-aac
+      inputs:
+        - path: rtsp://10.7.7.109:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.109:554/media/live/1/2
+          roles: [detect]
+
+  CAM10:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM10_sub
+        High Stream: CAM10
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.110:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.110:554/media/live/1/2
+          roles: [detect]
+
+  CAM11:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM11_sub
+        High Stream: CAM11
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.111:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.111:554/media/live/1/2
+          roles: [detect]
+
+  CAM12:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM12_sub
+        High Stream: CAM12
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.112:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.112:554/media/live/1/2
+          roles: [detect]
+
+  CAM13:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM13_sub
+        High Stream: CAM13
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.113:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.113:554/media/live/1/2
+          roles: [detect]
+
+  CAM14:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM14_sub
+        High Stream: CAM14
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.114:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.114:554/media/live/1/2
+          roles: [detect]
+    detect:
+      enabled: false
+      fps: 1
+
+  CAM15:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM15_sub
+        High Stream: CAM15
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.115:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.115:554/media/live/1/2
+          roles: [detect]
+
+  CAM16:
+    enabled: true
+    live:
+      streams:
+        Main Stream: CAM16_sub
+        High Stream: CAM16
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.7.7.116:554/media/live/1/1
+          roles: [record]
+        - path: rtsp://10.7.7.116:554/media/live/1/2
+          roles: [detect]
+
+version: 0.17-0
+
+camera_groups:
+  4cams:
+    order: 1
+    icon: LuAlarmClockMinus
+    cameras:
+      - birdseye
+      - CAM1
+      - CAM2
+      - CAM3
+  Outside:
+    order: 2
+    icon: LuTentTree
+    cameras:
+      - CAM4
+      - CAM2
+      - CAM15
+      - CAM16
+
+semantic_search:
+  enabled: false
+  model_size: small
+face_recognition:
+  enabled: true
+  model_size: small
+lpr:
+  enabled: false
+classification:
+  bird:
+    enabled: false
