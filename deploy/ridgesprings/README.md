@@ -6,6 +6,7 @@ This folder is the first live-test deployment path for replacing the Raspberry P
 
 - Frigate/Retail Rewind is built locally from the checked-out repo branch.
 - The runtime compose and persistent data live under `/opt/retailrewind`.
+- Existing media is mounted from `/mnt/frigate-storage` so the old footage stays on the large disk.
 - The Ridge Springs camera config is migrated to Frigate config `0.17-0`.
 - Raspberry Pi hwaccel was replaced with Intel VAAPI (`preset-vaapi`) and OpenVINO GPU detection.
 - Cloudflare Tunnel is optional and controlled by `/opt/retailrewind/.env`.
@@ -44,7 +45,7 @@ The installer creates:
 - `/opt/retailrewind/docker-compose.yml`
 - `/opt/retailrewind/.env`
 - `/opt/retailrewind/config/config.yml`
-- `/opt/retailrewind/media`
+- `/mnt/frigate-storage` mounted as Frigate media
 - `/opt/retailrewind/db`
 - `/opt/retailrewind/backups`
 
@@ -104,5 +105,6 @@ If the logs show VAAPI driver errors, change `LIBVA_DRIVER_NAME=iHD` to `LIBVA_D
 ## Notes
 
 - `/opt/retailrewind/config/config.yml` is copied only if missing, so UI edits and site tweaks are not overwritten by later updates.
-- Back up `/opt/retailrewind/config`, `/opt/retailrewind/db`, and `/opt/retailrewind/media` before major Frigate upgrades.
+- Back up `/opt/retailrewind/config`, `/opt/retailrewind/db`, and `/mnt/frigate-storage` before major Frigate upgrades.
+- The old media disk is almost full. Current retention is intentionally high to preserve old footage, so free space must be managed before this can record heavily.
 - The compose keeps the container name `frigate` and network `nvrnet` to stay close to the previous install.

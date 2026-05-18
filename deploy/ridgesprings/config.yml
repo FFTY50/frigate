@@ -103,19 +103,19 @@ detect:
 record:
   enabled: true
   retain:
-    days: 60
+    days: 365
     mode: motion
   alerts:
     pre_capture: 10
     post_capture: 15
     retain:
-      days: 60
+      days: 365
       mode: motion
 
 snapshots:
   enabled: true
   retain:
-    default: 60
+    default: 365
 
 birdseye:
   enabled: true
