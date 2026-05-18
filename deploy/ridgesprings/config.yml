@@ -102,10 +102,17 @@ detect:
 
 record:
   enabled: true
-  retain:
+  continuous:
+    days: 0
+  motion:
     days: 365
-    mode: motion
   alerts:
+    pre_capture: 10
+    post_capture: 15
+    retain:
+      days: 365
+      mode: motion
+  detections:
     pre_capture: 10
     post_capture: 15
     retain:
