@@ -93,8 +93,8 @@ export function EventReviewTimeline({
   });
 
   const timelineStartAligned = useMemo(
-    () => alignStartDateToTimeline(timelineStart),
-    [timelineStart, alignStartDateToTimeline],
+    () => alignStartDateToTimeline(timelineEnd),
+    [timelineEnd, alignStartDateToTimeline],
   );
 
   // Generate segment times for the timeline
@@ -102,7 +102,7 @@ export function EventReviewTimeline({
     const segmentCount = Math.ceil(timelineDuration / segmentDuration);
     return Array.from(
       { length: segmentCount },
-      (_, index) => timelineStartAligned - index * segmentDuration,
+      (_, index) => timelineStartAligned + index * segmentDuration,
     );
   }, [timelineDuration, segmentDuration, timelineStartAligned]);
 
@@ -117,7 +117,7 @@ export function EventReviewTimeline({
         alignStartDateToTimeline,
       );
 
-      scrollToSegment(Math.max(...alignedVisibleTimestamps), true);
+      scrollToSegment(Math.min(...alignedVisibleTimestamps), true);
     }
     // don't scroll when segments update from unreviewed -> reviewed
     // we know that these deps are correct

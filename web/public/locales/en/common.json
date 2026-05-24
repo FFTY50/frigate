@@ -153,8 +153,8 @@
     "continue": "Continue"
   },
   "menu": {
-    "system": "System",
-    "systemMetrics": "System metrics",
+    "system": "System Health",
+    "systemMetrics": "System health",
     "configuration": "Configuration",
     "systemLogs": "System logs",
     "settings": "Settings",
@@ -239,9 +239,9 @@
         "count_other": "{{count}} Cameras"
       }
     },
-    "review": "Review",
-    "explore": "Explore",
-    "export": "Export",
+    "review": "History",
+    "explore": "Search",
+    "export": "Saved Clips",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
     "classification": "Classification",
@@ -267,8 +267,8 @@
   "role": {
     "title": "Role",
     "admin": "Admin",
-    "viewer": "Viewer",
-    "desc": "Admins have full access to all features in the Frigate UI. Viewers are limited to viewing cameras, review items, and historical footage in the UI."
+    "viewer": "Manager",
+    "desc": "Admins have full access to all features. Managers can view cameras, search footage, review history, and use saved clips without access to technical settings."
   },
   "pagination": {
     "label": "pagination",

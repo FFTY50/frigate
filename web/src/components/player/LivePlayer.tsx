@@ -245,7 +245,7 @@ export default function LivePlayer({
     player = (
       <WebRtcPlayer
         key={"webrtc_" + key}
-        className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
+        className={`size-full rounded-lg object-fill md:rounded-2xl ${liveReady ? "" : "hidden"}`}
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
         getStats={showStats}
@@ -264,7 +264,7 @@ export default function LivePlayer({
       player = (
         <MSEPlayer
           key={"mse_" + key}
-          className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
+          className={`size-full rounded-lg object-fill md:rounded-2xl ${liveReady ? "" : "hidden"}`}
           camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
@@ -290,7 +290,7 @@ export default function LivePlayer({
       player = (
         <JSMpegPlayer
           key={"jsmpeg_" + key}
-          className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
+          className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
           camera={cameraConfig.name}
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
@@ -315,7 +315,7 @@ export default function LivePlayer({
       ref={cameraRef ?? internalContainerRef}
       data-camera={cameraConfig.name}
       className={cn(
-        "relative flex w-full cursor-pointer justify-center outline",
+        "relative flex size-full cursor-pointer justify-center overflow-hidden outline",
         activeTracking &&
           ((showStillWithoutActivity && !liveReady) || liveReady)
           ? "outline-3 rounded-lg shadow-severity_alert outline-severity_alert md:rounded-2xl"
@@ -409,6 +409,7 @@ export default function LivePlayer({
         <AutoUpdatingCameraImage
           className="pointer-events-none size-full"
           cameraClasses="relative size-full flex justify-center"
+          imageClasses="size-full object-fill"
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}

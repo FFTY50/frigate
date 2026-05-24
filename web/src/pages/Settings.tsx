@@ -130,7 +130,7 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "triggers",
 ];
 
-const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
+const ALLOWED_VIEWS_FOR_VIEWER = ["ui"];
 
 const getCurrentComponent = (page: SettingsType) => {
   for (const group of settingsGroups) {

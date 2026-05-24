@@ -26,6 +26,9 @@ import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
+
+const HISTORY_CAMERA_LIMIT = 4;
 
 export default function Events() {
   const { t } = useTranslation(["views/events"]);
@@ -33,6 +36,7 @@ export default function Events() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const allowedCameras = useAllowedCameras();
   const timezone = useTimezone(config);
 
   // recordings viewer
@@ -109,7 +113,10 @@ export default function Events() {
   useSearchEffect("cameras", (cameras: string) => {
     setReviewFilter({
       ...reviewFilter,
-      cameras: cameras.includes(",") ? cameras.split(",") : [cameras],
+      cameras: (cameras.includes(",") ? cameras.split(",") : [cameras]).slice(
+        0,
+        HISTORY_CAMERA_LIMIT,
+      ),
     });
     return true;
   });
@@ -139,7 +146,7 @@ export default function Events() {
       if (group && !isBirdseyeOnly) {
         setReviewFilter({
           ...reviewFilter,
-          cameras: group.cameras,
+          cameras: group.cameras.slice(0, HISTORY_CAMERA_LIMIT),
         });
       }
 
@@ -151,33 +158,85 @@ export default function Events() {
 
   const onUpdateFilter = useCallback(
     (newFilter: ReviewFilter) => {
-      setReviewFilter(newFilter);
+      const limitedFilter = {
+        ...newFilter,
+        cameras: newFilter.cameras?.slice(0, HISTORY_CAMERA_LIMIT),
+      };
+
+      setReviewFilter(limitedFilter);
 
       // update recording start time if filter
       // was changed on recording page
-      if (recording != undefined && newFilter.after != undefined) {
-        setRecording({ ...recording, startTime: newFilter.after }, true);
+      if (recording != undefined && limitedFilter.after != undefined) {
+        setRecording({ ...recording, startTime: limitedFilter.after }, true);
       }
     },
     [recording, setRecording, setReviewFilter],
   );
 
-  // review paging
+  const defaultHistoryCameras = useMemo(
+    () =>
+      allowedCameras
+        .filter((camera) => camera !== "birdseye")
+        .sort(
+          (a, b) =>
+            (config?.cameras[a]?.ui?.order ?? 0) -
+            (config?.cameras[b]?.ui?.order ?? 0),
+        )
+        .slice(0, HISTORY_CAMERA_LIMIT),
+    [allowedCameras, config],
+  );
 
   const [beforeTs, setBeforeTs] = useState(Math.ceil(Date.now() / 1000));
-  const last24Hours = useMemo(() => {
-    return { before: beforeTs, after: getHoursAgo(24) };
+  const defaultTimeRange = useMemo(() => {
+    const today = new Date(beforeTs * 1000);
+    return {
+      before: getEndOfDayTimestamp(today),
+      after: getBeginningOfDayTimestamp(today),
+    };
   }, [beforeTs]);
+
+  const effectiveReviewFilter = useMemo<ReviewFilter>(
+    () => ({
+      ...reviewFilter,
+      cameras: reviewFilter?.cameras ?? defaultHistoryCameras,
+      after: reviewFilter?.after ?? defaultTimeRange.after,
+      before: reviewFilter?.before ?? defaultTimeRange.before,
+    }),
+    [defaultHistoryCameras, defaultTimeRange, reviewFilter],
+  );
+
+  useEffect(() => {
+    if (!config || defaultHistoryCameras.length === 0) {
+      return;
+    }
+
+    if (
+      reviewFilter?.cameras == undefined ||
+      reviewFilter.cameras.length > HISTORY_CAMERA_LIMIT
+    ) {
+      setReviewFilter({
+        ...reviewFilter,
+        cameras: (reviewFilter?.cameras ?? defaultHistoryCameras).slice(
+          0,
+          HISTORY_CAMERA_LIMIT,
+        ),
+      });
+    }
+  }, [config, defaultHistoryCameras, reviewFilter, setReviewFilter]);
+
+  // review paging
+
   const selectedTimeRange = useMemo(() => {
     if (reviewSearchParams["after"] == undefined) {
-      return last24Hours;
+      return defaultTimeRange;
     }
 
     return {
       before: Math.ceil(reviewSearchParams["before"]),
       after: Math.floor(reviewSearchParams["after"]),
     };
-  }, [last24Hours, reviewSearchParams]);
+  }, [defaultTimeRange, reviewSearchParams]);
 
   // we want to update the items whenever the severity changes
   useEffect(() => {
@@ -202,15 +261,17 @@ export default function Events() {
 
   const getKey = useCallback(() => {
     const params = {
-      cameras: reviewSearchParams["cameras"],
+      cameras:
+        reviewSearchParams["cameras"] ??
+        effectiveReviewFilter.cameras?.join(","),
       labels: reviewSearchParams["labels"],
       zones: reviewSearchParams["zones"],
       reviewed: null, // We want both reviewed and unreviewed items as we filter in the UI
-      before: reviewSearchParams["before"] || last24Hours.before,
-      after: reviewSearchParams["after"] || last24Hours.after,
+      before: reviewSearchParams["before"] || effectiveReviewFilter.before,
+      after: reviewSearchParams["after"] || effectiveReviewFilter.after,
     };
     return ["review", params];
-  }, [reviewSearchParams, last24Hours]);
+  }, [reviewSearchParams, effectiveReviewFilter]);
 
   const { data: reviews, mutate: updateSegments } = useSWR<ReviewSegment[]>(
     getKey,
@@ -288,7 +349,10 @@ export default function Events() {
       "review/summary",
       {
         timezone: timezone,
-        cameras: reviewSearchParams["cameras"] ?? null,
+        cameras:
+          reviewSearchParams["cameras"] ??
+          effectiveReviewFilter.cameras?.join(",") ??
+          null,
         labels: reviewSearchParams["labels"] ?? null,
         zones: reviewSearchParams["zones"] ?? null,
       },
@@ -311,7 +375,10 @@ export default function Events() {
     "recordings/summary",
     {
       timezone: timezone,
-      cameras: reviewSearchParams["cameras"] ?? null,
+      cameras:
+        reviewSearchParams["cameras"] ??
+        effectiveReviewFilter.cameras?.join(",") ??
+        null,
     },
   ]);
 
@@ -473,7 +540,8 @@ export default function Events() {
     }
 
     setStartTime(recording.startTime);
-    const allCameras = reviewFilter?.cameras ?? Object.keys(config.cameras);
+    const allCameras =
+      effectiveReviewFilter.cameras ?? Object.keys(config.cameras);
 
     return {
       camera: recording.camera,
@@ -483,7 +551,7 @@ export default function Events() {
 
     // previews will not update after item is selected
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recording, reviews]);
+  }, [effectiveReviewFilter.cameras, recording, reviews]);
 
   if (!timezone) {
     return <ActivityIndicator />;
@@ -501,7 +569,7 @@ export default function Events() {
           reviewSummary={reviewSummary}
           allPreviews={allPreviews}
           timeRange={selectedTimeRange}
-          filter={reviewFilter}
+          filter={effectiveReviewFilter}
           updateFilter={onUpdateFilter}
           refreshData={reloadData}
         />
@@ -516,7 +584,7 @@ export default function Events() {
         recordingsSummary={recordingsSummary}
         relevantPreviews={allPreviews}
         timeRange={selectedTimeRange}
-        filter={reviewFilter}
+        filter={effectiveReviewFilter}
         severity={severity ?? "alert"}
         startTime={startTime}
         showReviewed={showReviewed ?? false}
@@ -530,10 +598,4 @@ export default function Events() {
       />
     );
   }
-}
-
-function getHoursAgo(hours: number): number {
-  const now = new Date();
-  now.setHours(now.getHours() - hours);
-  return Math.ceil(now.getTime() / 1000);
 }

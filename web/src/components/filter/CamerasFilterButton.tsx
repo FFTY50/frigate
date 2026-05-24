@@ -21,6 +21,7 @@ type CameraFilterButtonProps = {
   selectedCameras: string[] | undefined;
   hideText?: boolean;
   mainCamera?: string;
+  maxSelectedCameras?: number;
   updateCameraFilter: (cameras: string[] | undefined) => void;
 };
 export function CamerasFilterButton({
@@ -29,6 +30,7 @@ export function CamerasFilterButton({
   selectedCameras,
   hideText = isMobile,
   mainCamera,
+  maxSelectedCameras,
   updateCameraFilter,
 }: CameraFilterButtonProps) {
   const { t } = useTranslation(["components/filter"]);
@@ -108,6 +110,7 @@ export function CamerasFilterButton({
       groups={filteredGroups}
       currentCameras={currentCameras}
       mainCamera={mainCamera}
+      maxSelectedCameras={maxSelectedCameras}
       setCurrentCameras={setCurrentCameras}
       setOpen={setOpen}
       updateCameraFilter={updateCameraFilter}
@@ -156,6 +159,7 @@ type CamerasFilterContentProps = {
   currentCameras: string[] | undefined;
   mainCamera?: string;
   groups: [string, CameraGroupConfig][];
+  maxSelectedCameras?: number;
   setCurrentCameras: (cameras: string[] | undefined) => void;
   setOpen: (open: boolean) => void;
   updateCameraFilter: (cameras: string[] | undefined) => void;
@@ -165,11 +169,20 @@ export function CamerasFilterContent({
   currentCameras,
   mainCamera,
   groups,
+  maxSelectedCameras,
   setCurrentCameras,
   setOpen,
   updateCameraFilter,
 }: CamerasFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
+  const canSelectAll =
+    maxSelectedCameras == undefined || allCameras.length <= maxSelectedCameras;
+
+  const trimToCameraLimit = (cameras: string[]) =>
+    maxSelectedCameras == undefined
+      ? cameras
+      : cameras.slice(0, maxSelectedCameras);
+
   return (
     <>
       {isMobile && (
@@ -184,12 +197,18 @@ export function CamerasFilterContent({
         <FilterSwitch
           isChecked={currentCameras == undefined}
           label={t("cameras.all.title")}
+          disabled={!canSelectAll}
           onCheckedChange={(isChecked) => {
-            if (isChecked) {
+            if (isChecked && canSelectAll) {
               setCurrentCameras(undefined);
             }
           }}
         />
+        {maxSelectedCameras != undefined && (
+          <div className="px-2 text-xs text-secondary-foreground">
+            {t("cameras.maxSelected", { count: maxSelectedCameras })}
+          </div>
+        )}
         {groups.length > 0 && (
           <>
             <DropdownMenuSeparator />
@@ -199,7 +218,7 @@ export function CamerasFilterContent({
                   key={name}
                   className="w-full cursor-pointer rounded-lg px-2 py-0.5 text-sm text-primary smart-capitalize hover:bg-muted"
                   onClick={() => {
-                    setCurrentCameras([...conf.cameras]);
+                    setCurrentCameras(trimToCameraLimit([...conf.cameras]));
                   }}
                 >
                   {name}
@@ -217,9 +236,12 @@ export function CamerasFilterContent({
               label={item}
               type={"camera"}
               disabled={
-                mainCamera !== undefined &&
-                currentCameras !== undefined &&
-                item === mainCamera
+                (mainCamera !== undefined &&
+                  currentCameras !== undefined &&
+                  item === mainCamera) ||
+                (maxSelectedCameras != undefined &&
+                  !currentCameras?.includes(item) &&
+                  (currentCameras?.length ?? 0) >= maxSelectedCameras)
               } // Disable only if mainCamera exists and cameras are filtered
               onCheckedChange={(isChecked) => {
                 if (
@@ -239,7 +261,7 @@ export function CamerasFilterContent({
                   if (!updatedCameras.includes(item)) {
                     updatedCameras.push(item);
                   }
-                  setCurrentCameras(updatedCameras);
+                  setCurrentCameras(trimToCameraLimit(updatedCameras));
                 } else {
                   const updatedCameras = currentCameras
                     ? [...currentCameras]
@@ -271,8 +293,11 @@ export function CamerasFilterContent({
         <Button
           aria-label={t("button.reset", { ns: "common" })}
           onClick={() => {
-            setCurrentCameras(undefined);
-            updateCameraFilter(undefined);
+            const resetCameras = canSelectAll
+              ? undefined
+              : allCameras.slice(0, maxSelectedCameras);
+            setCurrentCameras(resetCameras);
+            updateCameraFilter(resetCameras);
           }}
         >
           {t("button.reset", { ns: "common" })}

@@ -16,6 +16,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { isRedirectingToLogin } from "@/api/auth-redirect";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -52,6 +53,7 @@ function DefaultAppView() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const isAdmin = useIsAdmin();
 
   // Compute required roles for main routes, ensuring we have config first
   // to prevent race condition where custom roles are temporarily unavailable
@@ -72,7 +74,7 @@ function DefaultAppView() {
   return (
     <div className="size-full overflow-hidden">
       {isDesktop && <Sidebar />}
-      {isDesktop && <Statusbar />}
+      {isDesktop && isAdmin && <Statusbar />}
       {isMobile && <Bottombar />}
       <div
         id="pageRoot"
@@ -96,7 +98,9 @@ function DefaultAppView() {
             >
               <Route index element={<Live />} />
               <Route path="/review" element={<Events />} />
+              <Route path="/history" element={<Events />} />
               <Route path="/explore" element={<Explore />} />
+              <Route path="/search" element={<Explore />} />
               <Route path="/export" element={<Exports />} />
               <Route path="/settings" element={<Settings />} />
             </Route>

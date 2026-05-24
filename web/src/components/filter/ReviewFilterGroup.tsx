@@ -42,6 +42,7 @@ const DEFAULT_REVIEW_FILTERS: ReviewFilters[] = [
   "general",
   "motionOnly",
 ];
+const HISTORY_CAMERA_LIMIT = 4;
 
 type ReviewFilterGroupProps = {
   filters?: ReviewFilters[];
@@ -200,6 +201,7 @@ export default function ReviewFilterGroup({
           groups={groups}
           selectedCameras={filter?.cameras}
           mainCamera={mainCamera}
+          maxSelectedCameras={HISTORY_CAMERA_LIMIT}
           updateCameraFilter={(newCameras) => {
             onUpdateFilter({ ...filter, cameras: newCameras });
           }}

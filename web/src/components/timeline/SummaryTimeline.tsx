@@ -353,7 +353,7 @@ export function SummaryTimeline({
     >
       <div
         ref={summaryTimelineRef}
-        className="relative z-10 flex h-full flex-col-reverse"
+        className="relative z-10 flex h-full flex-col"
         onClick={timelineClick}
         onTouchEnd={timelineClick}
       >

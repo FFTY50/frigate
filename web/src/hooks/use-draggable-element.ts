@@ -160,7 +160,7 @@ function useDraggableElement({
 
   const timestampToPixels = useCallback(
     (time: number) => {
-      return ((timelineStartAligned - time) / segmentDuration) * segmentHeight;
+      return ((time - timelineStartAligned) / segmentDuration) * segmentHeight;
     },
     [segmentDuration, timelineStartAligned, segmentHeight],
   );
@@ -257,27 +257,23 @@ function useDraggableElement({
         segments.length > 0 &&
         fullTimelineHeight
       ) {
-        const { scrollTop: scrolled } = timelineRef.current;
-
         const parentScrollTop = getCumulativeScrollTop(timelineRef.current);
 
-        // bottom of timeline
-        const elementEarliest = draggableElementEarliestTime
+        const minElementPosition = draggableElementEarliestTime
           ? timestampToPixels(draggableElementEarliestTime)
-          : fullTimelineHeight - segmentHeight * 1.5;
-
-        // top of timeline - default 2 segments added for draggableElement visibility
-        const elementLatest = draggableElementLatestTime
-          ? timestampToPixels(draggableElementLatestTime)
           : segmentHeight * 1.5;
+
+        const maxElementPosition = draggableElementLatestTime
+          ? timestampToPixels(draggableElementLatestTime)
+          : fullTimelineHeight - segmentHeight * 1.5;
 
         const timelineRect = timelineRef.current.getBoundingClientRect();
         const timelineTopAbsolute = timelineRect.top;
 
         const newElementPosition = Math.min(
-          elementEarliest,
+          maxElementPosition,
           Math.max(
-            elementLatest,
+            minElementPosition,
             // current Y position
             clientYPosition -
               timelineTopAbsolute +
@@ -287,24 +283,21 @@ function useDraggableElement({
         );
 
         if (
-          newElementPosition >= elementEarliest ||
-          newElementPosition <= elementLatest
+          newElementPosition >= maxElementPosition ||
+          newElementPosition <= minElementPosition
         ) {
           return;
         }
 
-        const start = Math.max(0, Math.floor(scrolled / segmentHeight));
-
-        const relativePosition = newElementPosition - scrolled;
-        const segmentIndex =
-          Math.floor(relativePosition / segmentHeight) + start + 1;
+        const segmentIndex = Math.floor(newElementPosition / segmentHeight);
 
         const targetSegmentTime = segments[segmentIndex];
         if (targetSegmentTime === undefined) return;
 
-        const segmentStart = segmentIndex * segmentHeight - scrolled;
-
-        const offset = Math.min(segmentStart - relativePosition, segmentHeight);
+        const offset = Math.min(
+          Math.max(newElementPosition - segmentIndex * segmentHeight, 0),
+          segmentHeight,
+        );
 
         if ((draggingAtTopEdge || draggingAtBottomEdge) && scrollEdgeSize) {
           if (draggingAtTopEdge) {
@@ -410,7 +403,7 @@ function useDraggableElement({
           ((draggableElementTime - alignedSegmentTime) / segmentDuration) *
           segmentHeight;
         // subtract half the height of the handlebar cross bar (4px) for pixel perfection
-        const newElementPosition = segmentStart - offset - 2;
+        const newElementPosition = segmentStart + offset - 2;
 
         updateDraggableElementPosition(
           newElementPosition,

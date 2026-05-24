@@ -100,8 +100,8 @@ export function MotionReviewTimeline({
   });
 
   const timelineStartAligned = useMemo(
-    () => alignStartDateToTimeline(timelineStart) + 2 * segmentDuration,
-    [timelineStart, alignStartDateToTimeline, segmentDuration],
+    () => alignStartDateToTimeline(timelineEnd),
+    [timelineEnd, alignStartDateToTimeline],
   );
 
   const { getMotionSegmentValue } = useMotionSegmentUtils(
@@ -149,7 +149,7 @@ export function MotionReviewTimeline({
           segments.push(segmentTime);
         }
       }
-      segmentTime -= segmentDuration;
+      segmentTime += segmentDuration;
     }
 
     return segments;

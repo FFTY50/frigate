@@ -307,8 +307,8 @@ export function ReviewTimeline({
       exportStartPosition &&
       exportEndPosition
     ) {
-      exportSectionRef.current.style.top = `${exportEndPosition + segmentHeight}px`;
-      exportSectionRef.current.style.height = `${exportStartPosition - exportEndPosition + segmentHeight / 2}px`;
+      exportSectionRef.current.style.top = `${exportStartPosition + segmentHeight}px`;
+      exportSectionRef.current.style.height = `${exportEndPosition - exportStartPosition + segmentHeight / 2}px`;
     }
   }, [
     showExportHandles,

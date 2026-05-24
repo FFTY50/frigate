@@ -38,18 +38,18 @@ export default function useNavigation(
           url: "/",
         },
         {
-          id: ID_REVIEW,
-          variant,
-          icon: MdVideoLibrary,
-          title: "menu.review",
-          url: "/review",
-        },
-        {
           id: ID_EXPLORE,
           variant,
           icon: IoSearch,
           title: "menu.explore",
-          url: "/explore",
+          url: "/search",
+        },
+        {
+          id: ID_REVIEW,
+          variant,
+          icon: MdVideoLibrary,
+          title: "menu.review",
+          url: "/history",
         },
         {
           id: ID_EXPORT,

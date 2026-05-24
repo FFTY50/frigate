@@ -504,16 +504,7 @@ export default function LiveDashboardView({
                   </div>
                 )}
                 {cameras.map((camera) => {
-                  let grow;
-                  const aspectRatio =
-                    camera.detect.width / camera.detect.height;
-                  if (aspectRatio > 2) {
-                    grow = `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
-                  } else if (aspectRatio < 1) {
-                    grow = `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
-                  } else {
-                    grow = "aspect-video";
-                  }
+                  const grow = "aspect-video";
                   const availableStreams = camera.live.streams || {};
                   const firstStreamEntry =
                     Object.values(availableStreams)[0] || "";

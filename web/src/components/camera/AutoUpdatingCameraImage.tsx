@@ -7,6 +7,7 @@ type AutoUpdatingCameraImageProps = {
   showFps?: boolean;
   className?: string;
   cameraClasses?: string;
+  imageClasses?: string;
   reloadInterval?: number;
   periodicCache?: boolean;
 };
@@ -19,6 +20,7 @@ export default function AutoUpdatingCameraImage({
   showFps = true,
   className,
   cameraClasses,
+  imageClasses,
   reloadInterval = MIN_LOAD_TIMEOUT_MS,
   periodicCache = false,
 }: AutoUpdatingCameraImageProps) {
@@ -96,6 +98,7 @@ export default function AutoUpdatingCameraImage({
         onload={handleLoad}
         searchParams={cacheKey}
         className={cameraClasses}
+        imageClassName={imageClasses}
       />
       {showFps ? <span className="text-xs">Displaying at {fps}fps</span> : null}
     </div>

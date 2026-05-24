@@ -28,7 +28,6 @@ import {
   StatsState,
   VolumeState,
 } from "@/types/live";
-import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isEqual } from "lodash";
@@ -575,15 +574,7 @@ export default function DraggableGridLayout({
               </BirdseyeLivePlayerGridItem>
             )}
             {cameras.map((camera) => {
-              let grow;
-              const aspectRatio = camera.detect.width / camera.detect.height;
-              if (aspectRatio > ASPECT_WIDE_LAYOUT) {
-                grow = `aspect-wide w-full`;
-              } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
-                grow = `aspect-tall h-full`;
-              } else {
-                grow = "aspect-video";
-              }
+              const grow = "aspect-video";
               const availableStreams = camera.live.streams || {};
               const firstStreamEntry = Object.values(availableStreams)[0] || "";
 

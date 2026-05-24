@@ -17,9 +17,11 @@ import { cn } from "@/lib/utils";
 import { isIOS, isMobile } from "react-device-detect";
 import { isPWA } from "@/utils/isPWA";
 import { useTranslation } from "react-i18next";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
+  const isAdmin = useIsAdmin();
 
   return (
     <div
@@ -35,7 +37,7 @@ function Bottombar() {
         <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
       ))}
       <GeneralSettings className="p-2" />
-      <StatusAlertNav className="p-2" />
+      {isAdmin && <StatusAlertNav className="p-2" />}
     </div>
   );
 }

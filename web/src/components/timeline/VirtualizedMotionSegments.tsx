@@ -162,8 +162,8 @@ export const VirtualizedMotionSegments = forwardRef<
 
         // Check if previous and next segments have recordings
         // This is important because in motionOnly mode, the segments array is filtered
-        const prevSegmentTime = segmentTime + segmentDuration;
-        const nextSegmentTime = segmentTime - segmentDuration;
+        const prevSegmentTime = segmentTime - segmentDuration;
+        const nextSegmentTime = segmentTime + segmentDuration;
 
         const prevHasRecording = getRecordingAvailability(prevSegmentTime);
         const nextHasRecording = getRecordingAvailability(nextSegmentTime);

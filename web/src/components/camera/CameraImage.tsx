@@ -9,6 +9,7 @@ import { useEnabledState } from "@/api/ws";
 
 type CameraImageProps = {
   className?: string;
+  imageClassName?: string;
   camera: string;
   onload?: () => void;
   searchParams?: string;
@@ -16,6 +17,7 @@ type CameraImageProps = {
 
 export default function CameraImage({
   className,
+  imageClassName,
   camera,
   onload,
   searchParams = "",
@@ -86,12 +88,16 @@ export default function CameraImage({
         <img
           ref={imgRef}
           className={cn(
-            "object-contain",
-            imageLoaded
-              ? isPortraitImage
-                ? "h-full w-auto"
-                : "h-auto w-full"
-              : "invisible",
+            imageClassName ??
+              cn(
+                "object-contain",
+                imageLoaded
+                  ? isPortraitImage
+                    ? "h-full w-auto"
+                    : "h-auto w-full"
+                  : "invisible",
+              ),
+            !imageLoaded && "invisible",
             "rounded-lg md:rounded-2xl",
           )}
           onLoad={handleImageLoad}

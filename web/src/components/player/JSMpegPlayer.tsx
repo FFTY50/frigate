@@ -1,5 +1,4 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { PlayerStatsType } from "@/types/live";
 // @ts-expect-error we know this doesn't have types
@@ -49,62 +48,11 @@ export default function JSMpegPlayer({
     [containerRef, containerRef.current, internalContainerRef],
   );
 
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(selectedContainerRef);
-
-  const stretch = true;
-  const aspectRatio = width / height;
-
-  const fitAspect = useMemo(
-    () => containerWidth / containerHeight,
-    [containerWidth, containerHeight],
-  );
-
-  const scaledHeight = useMemo(() => {
-    if (selectedContainerRef?.current && width && height) {
-      const scaledHeight =
-        aspectRatio < (fitAspect ?? 0)
-          ? Math.floor(
-              Math.min(
-                containerHeight,
-                selectedContainerRef.current?.clientHeight,
-              ),
-            )
-          : aspectRatio >= fitAspect
-            ? Math.floor(containerWidth / aspectRatio)
-            : Math.floor(containerWidth / aspectRatio) / 1.5;
-      const finalHeight = stretch
-        ? scaledHeight
-        : Math.min(scaledHeight, height);
-
-      if (finalHeight > 0) {
-        return finalHeight;
-      }
-    }
-    return undefined;
-  }, [
-    aspectRatio,
-    containerWidth,
-    containerHeight,
-    fitAspect,
-    height,
-    width,
-    stretch,
-    selectedContainerRef,
-  ]);
-
-  const scaledWidth = useMemo(() => {
-    if (aspectRatio && scaledHeight) {
-      return Math.ceil(scaledHeight * aspectRatio);
-    }
-    return undefined;
-  }, [scaledHeight, aspectRatio]);
-
   useEffect(() => {
-    if (scaledWidth && scaledHeight) {
+    if (selectedContainerRef.current && width && height) {
       setDimensionsReady(true);
     }
-  }, [scaledWidth, scaledHeight]);
+  }, [height, selectedContainerRef, width]);
 
   useEffect(() => {
     onPlayingRef.current = onPlaying;
@@ -226,17 +174,13 @@ export default function JSMpegPlayer({
         <div
           ref={videoRef}
           className={cn(
-            "jsmpeg flex h-full w-auto items-center justify-center",
+            "jsmpeg flex size-full items-center justify-center",
             !showCanvas && "hidden",
           )}
         >
           <canvas
             ref={canvasRef}
-            className="rounded-lg md:rounded-2xl"
-            style={{
-              width: scaledWidth,
-              height: scaledHeight,
-            }}
+            className="size-full rounded-lg md:rounded-2xl"
           ></canvas>
         </div>
       </div>

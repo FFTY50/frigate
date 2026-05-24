@@ -65,6 +65,7 @@
   },
   "cameras": {
     "label": "Cameras Filter",
+    "maxSelected": "History is limited to {{count}} cameras at a time.",
     "all": {
       "title": "All Cameras",
       "short": "Cameras"
